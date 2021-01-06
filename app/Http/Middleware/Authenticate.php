@@ -2,20 +2,16 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Auth\Middleware\Authenticate as Middleware;
-
-class Authenticate extends Middleware
+class Authenticate 
 {
-    /**
-     * Get the path the user should be redirected to when they are not authenticated.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return string|null
-     */
-    protected function redirectTo($request)
+    public function handle($request, $next)
     {
-        if (! $request->expectsJson()) {
-            return route('login');
+        if($request->header('authorization') == 'asdasd') {
+            return  $next($request);
         }
+
+        $obj = (object)[];
+        $obj->message = 'Invalid token';
+        return response(json_encode($obj), 403);
     }
 }

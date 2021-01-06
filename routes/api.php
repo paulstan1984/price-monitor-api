@@ -18,7 +18,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
 Route::get('/user/{id}', function ($id) {
-    return 'User '.$id;
-});
+    return response(json_encode($id), 200);
+})->middleware('auth:api');
