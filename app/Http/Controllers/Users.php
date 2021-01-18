@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Middleware\Authenticate;
 
-class User extends Controller
+class Users extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,8 +16,7 @@ class User extends Controller
     {
         $password = $request->get('Password');
         if($password == env('ADMIN_PASSWORD')) {
-            $token = md5($password.env('ADMIN_KEY'));
-            return response()->json(['token'=>$token], 200);
+            return response()->json(['token'=>Authenticate::getToken()], 200);
         }
 
         return response()->json(['Password'=>'Invalid login!'], 400);

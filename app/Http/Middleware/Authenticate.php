@@ -5,16 +5,17 @@ use Illuminate\Support\Facades\Log;
 
 class Authenticate 
 {
+
+    public static function getToken() {
+        return md5(env('ADMIN_PASSWORD').env('ADMIN_KEY'));
+    }
+
     public function handle($request, $next)
     {
-        Log::debug('An informational message.');
-
-        if($request->header('authorization') == 'asdasd') {
+        if($request->header('authorization') == Authenticate::getToken()) {
             return  $next($request);
         }
 
-        $obj = (object)[];
-        $obj->message = 'Invalid token';
-        return response(json_encode($obj), 403);
+        return response(json_encode(['Error'=>'Invalid token!']), 403);
     }
 }
