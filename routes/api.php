@@ -16,8 +16,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', 'Users@login');
 
-Route::get('/stores/list', 'Stores@index')->middleware('auth:api');
-Route::post('/stores', 'Stores@store')->middleware('auth:api');
+Route::get('/stores', 'Stores@index')->middleware('auth:api');
+Route::post('/stores', 'Stores@search')->middleware('auth:api');
+Route::put('/stores', 'Stores@store')->middleware('auth:api');
 Route::get('/stores/{id}', 'Stores@show')->middleware('auth:api');
 Route::put('/stores/{id}', 'Stores@update')->middleware('auth:api');
 Route::delete('/stores/{id}', 'Stores@destroy')->middleware('auth:api');
