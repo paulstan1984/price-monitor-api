@@ -18,10 +18,17 @@ Route::post('/login', 'Users@login');
 
 Route::get('/stores', 'Stores@index')->middleware('auth:api');
 Route::post('/stores', 'Stores@search')->middleware('auth:api');
-Route::put('/stores', 'Stores@store')->middleware('auth:api');
-Route::get('/stores/{id}', 'Stores@show')->middleware('auth:api');
+Route::put('/stores', 'Stores@create')->middleware('auth:api');
+Route::get('/stores/{id}', 'Stores@read')->middleware('auth:api');
 Route::put('/stores/{id}', 'Stores@update')->middleware('auth:api');
 Route::delete('/stores/{id}', 'Stores@destroy')->middleware('auth:api');
+
+Route::get('/categories', 'Categories@index')->middleware('auth:api');
+Route::post('/categories', 'Categories@search')->middleware('auth:api');
+Route::put('/categories', 'Categories@create')->middleware('auth:api');
+Route::get('/categories/{id}', 'Categories@read')->middleware('auth:api');
+Route::put('/categories/{id}', 'Categories@update')->middleware('auth:api');
+Route::delete('/categories/{id}', 'Categories@destroy')->middleware('auth:api');
 
 Route::get('/user/{id}', function ($id) {
     return response(json_encode($id), 200);

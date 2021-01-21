@@ -26,7 +26,7 @@ class Stores extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required','max:100', Rule::unique('stores')],
@@ -48,7 +48,7 @@ class Stores extends Controller
      * @param int id the id of the store
      * @return \Illuminate\Http\Response
      */
-    public function show(int $id)
+    public function read(int $id)
     {
         $item = Store::find($id);
 
