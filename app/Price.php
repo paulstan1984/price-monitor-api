@@ -11,11 +11,11 @@ class Price extends Model
 
     public function product()
     {
-        return $this->hasOne(Product::class, 'product_id', 'id');
+        return $this->belongsTo(Product::class, 'product_id', 'id');
     }
 
     public function store()
     {
-        return $this->hasOne(Store::class, 'store_id', 'id');
+        return $this->belongsTo(Store::class, 'store_id', 'id');
     }
 }
