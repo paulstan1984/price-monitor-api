@@ -30,6 +30,9 @@ Route::get('/categories/{id}', 'Categories@read')->middleware('auth:api');
 Route::put('/categories/{id}', 'Categories@update')->middleware('auth:api');
 Route::delete('/categories/{id}', 'Categories@destroy')->middleware('auth:api');
 
-Route::get('/user/{id}', function ($id) {
-    return response(json_encode($id), 200);
-})->middleware('auth:api');
+Route::get('/products', 'Products@index')->middleware('auth:api');
+Route::post('/products', 'Products@search')->middleware('auth:api');
+Route::put('/products', 'Products@create')->middleware('auth:api');
+Route::get('/products/{id}', 'Products@read')->middleware('auth:api');
+Route::put('/products/{id}', 'Products@update')->middleware('auth:api');
+Route::delete('/products/{id}', 'Products@destroy')->middleware('auth:api');
