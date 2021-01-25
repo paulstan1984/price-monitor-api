@@ -36,3 +36,10 @@ Route::put('/products', 'Products@create')->middleware('auth:api');
 Route::get('/products/{id}', 'Products@read')->middleware('auth:api');
 Route::put('/products/{id}', 'Products@update')->middleware('auth:api');
 Route::delete('/products/{id}', 'Products@destroy')->middleware('auth:api');
+
+Route::get('/prices', 'Prices@index')->middleware('auth:api');
+Route::post('/prices', 'Prices@search')->middleware('auth:api');
+Route::put('/prices', 'Prices@create')->middleware('auth:api');
+Route::get('/prices/{id}', 'Prices@read')->middleware('auth:api');
+Route::put('/prices/{id}', 'Prices@update')->middleware('auth:api');
+Route::delete('/prices/{id}', 'Prices@destroy')->middleware('auth:api');
