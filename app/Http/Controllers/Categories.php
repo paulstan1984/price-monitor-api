@@ -6,9 +6,17 @@ use App\Category;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule; 
 use Illuminate\Support\Facades\Validator;
+use App\Services\PaginationService;
 
 class Categories extends Controller
 {
+    protected $paginationService;
+
+    public function __construct(PaginationService $paginationService) {
+
+        $this->paginationService = $paginationService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -40,6 +48,43 @@ class Categories extends Controller
         $item->name = $data['name'];
         $item->save();
         return response()->json($item, 200);
+    }
+
+    /**
+     * Search categories
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function search(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => ['string'],
+            'order_by' => ['string'],
+            'order_dir' => ['string'],
+            'page' => ['required','numeric', 'min:1'],
+        ]);
+        if($validator->fails()){
+            return response()->json($validator->messages(), 400);
+        }
+
+        $data = $validator->valid();
+        
+        $items = Category::query();
+
+        if(!empty($data['name'])){
+            $items = $items->where('name', 'like', '%' . $data['name'] . '%');
+        }
+
+        if(!empty($data['order_by']) && !empty($data['order_by_dir'])) {
+            $items = $this->paginationService->applyOrder($items, $data['order_by'], $data['order_by_dir']);
+        } else if(!empty($data['order_by'])) {
+            $items = $this->paginationService->applyOrder($items, $data['order_by']);
+        }
+
+        $items = $this->paginationService->applyPagination($items, $data['page']);
+        
+        return response()->json($items, 200);
     }
 
     /**

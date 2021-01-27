@@ -6,10 +6,18 @@ use App\Price;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule; 
 use Illuminate\Support\Facades\Validator;
-
+use App\Services\PaginationService;
 
 class Prices extends Controller
 {
+
+    protected $paginationService;
+
+    public function __construct(PaginationService $paginationService) {
+
+        $this->paginationService = $paginationService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -51,6 +59,52 @@ class Prices extends Controller
         $item->product->get();
         $item->store->get();
         return response()->json($item, 200);
+    }
+
+    /**
+     * Search price
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function search(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'product' => ['string'],
+            'store' => ['string'],
+            'order_by' => ['string'],
+            'order_dir' => ['string'],
+            'page' => ['required','numeric', 'min:1'],
+        ]);
+        if($validator->fails()){
+            return response()->json($validator->messages(), 400);
+        }
+
+        $data = $validator->valid();
+        
+        $items = Price::query()->with(['product', 'store']);
+
+        if(!empty($data['product'])){
+            $items = $items->whereHas('product', function($q) use ($data) {
+                $q->where('name', 'like', '%' . $data['product'] . '%');
+            });
+        }
+
+        if(!empty($data['store'])){
+            $items = $items->whereHas('store', function($q) use ($data) {
+                $q->where('name', 'like', '%' . $data['store'] . '%');
+            });
+        }
+
+        if(!empty($data['order_by']) && !empty($data['order_by_dir'])) {
+            $items = $this->paginationService->applyOrder($items, $data['order_by'], $data['order_by_dir']);
+        } else if(!empty($data['order_by'])) {
+            $items = $this->paginationService->applyOrder($items, $data['order_by']);
+        }
+
+        $items = $this->paginationService->applyPagination($items, $data['page']);
+        
+        return response()->json($items, 200);
     }
 
     /**
