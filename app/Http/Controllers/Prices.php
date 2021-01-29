@@ -70,8 +70,8 @@ class Prices extends Controller
     public function search(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'product' => ['string'],
-            'store' => ['string'],
+            'product' => ['string', 'nullable'],
+            'store' => ['string', 'nullable'],
             'order_by' => ['string'],
             'order_dir' => ['string'],
             'page' => ['required','numeric', 'min:1'],
@@ -97,9 +97,13 @@ class Prices extends Controller
         }
 
         if(!empty($data['order_by']) && !empty($data['order_by_dir'])) {
-            $items = $this->paginationService->applyOrder($items, $data['order_by'], $data['order_by_dir']);
+            $items = $this
+                ->paginationService
+                ->applyOrder($items, $data['order_by'], $data['order_by_dir'], 'prices');
         } else if(!empty($data['order_by'])) {
-            $items = $this->paginationService->applyOrder($items, $data['order_by']);
+            $items = $this
+                ->paginationService
+                ->applyOrder($items, $data['order_by'], 'ASC', 'prices');
         }
 
         $items = $this->paginationService->applyPagination($items, $data['page']);

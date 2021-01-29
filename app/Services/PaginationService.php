@@ -26,8 +26,21 @@ class PaginationService {
         ];
     }
 
-    function applyOrder($query, $order_by, $order_dir = 'ASC'){
-        return $query->orderBy($order_by, $order_dir);
+    function applyOrder($query, $order_by, $order_dir = 'ASC', $base_table = ''){
+
+        if(strpos($order_by, '.') == false){
+            return $query->orderBy($order_by, $order_dir);
+        }
+        else {
+            $fields = explode('.', $order_by);
+            $order_by = $fields[1].'.'.$fields[2];
+            $related_table = $fields[1];
+            $foreign_key = $fields[0];
+
+            return $query
+                    ->join($related_table, $base_table.'.'.$foreign_key, '=', $related_table.'.id')
+                    ->orderBy($order_by, $order_dir);
+        }
     }
 
 }
