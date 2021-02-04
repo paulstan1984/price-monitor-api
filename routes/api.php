@@ -40,6 +40,7 @@ Route::delete('/products/{id}', 'Products@destroy')->middleware('auth:api');
 Route::get('/prices', 'Prices@index')->middleware('auth:api');
 Route::post('/prices', 'Prices@search')->middleware('auth:api');
 Route::put('/prices', 'Prices@create')->middleware('auth:api');
+Route::patch('/prices', 'Prices@buy')->middleware('auth:api');
 Route::get('/prices/{id}', 'Prices@read')->middleware('auth:api');
 Route::put('/prices/{id}', 'Prices@update')->middleware('auth:api');
 Route::delete('/prices/{id}', 'Prices@destroy')->middleware('auth:api');

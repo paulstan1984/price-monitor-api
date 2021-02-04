@@ -65,8 +65,8 @@ class Products extends Controller
     public function search(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => ['string'],
-            'category' => ['string'],
+            'name' => ['string', 'nullable'],
+            'category' => ['string', 'nullable'],
             'order_by' => ['string'],
             'order_dir' => ['string'],
             'page' => ['required','numeric', 'min:1'],

@@ -62,6 +62,34 @@ class Prices extends Controller
     }
 
     /**
+     * Price a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function buy(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'product_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:products,id'],
+            'store_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:stores,id'],
+            'amount' => ['required','numeric', 'min:0', 'not_in:0'],
+        ]);
+        if($validator->fails()){
+            return response()->json($validator->messages(), 400);
+        }
+
+        $data = $validator->valid();
+        $item = new Price();
+        $item->product_id = $data['product_id'];
+        $item->store_id = $data['store_id'];
+        $item->amount = $data['amount'];
+        $item->save();
+        $item->product->get();
+        $item->store->get();
+        return response()->json($item, 200);
+    }
+
+    /**
      * Search price
      *
      * @param  \Illuminate\Http\Request  $request
