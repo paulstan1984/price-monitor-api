@@ -70,23 +70,26 @@ class Prices extends Controller
     public function buy(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'product_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:products,id'],
-            'store_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:stores,id'],
-            'amount' => ['required','numeric', 'min:0', 'not_in:0'],
+            '*.product_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:products,id'],
+            '*.store_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:stores,id'],
+            '*.amount' => ['required','numeric', 'min:0', 'not_in:0'],
         ]);
         if($validator->fails()){
             return response()->json($validator->messages(), 400);
         }
 
-        $data = $validator->valid();
-        $item = new Price();
-        $item->product_id = $data['product_id'];
-        $item->store_id = $data['store_id'];
-        $item->amount = $data['amount'];
-        $item->save();
-        $item->product->get();
-        $item->store->get();
-        return response()->json($item, 200);
+        $datas = $validator->valid();
+
+        $prices = [];
+        foreach($datas as $data){
+            $item = $data;
+            $item['created_at'] = date('Y-m-d H:i:s');
+            $item['updated_at'] = date('Y-m-d H:i:s');
+            $prices[]=$data;
+        }
+        Price::insert($prices);
+
+        return response()->json($datas, 200);
     }
 
     /**
