@@ -42,25 +42,23 @@ class Prices extends Controller
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'row.*.product_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:products,id'],
-            'row.*.store_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:stores,id'],
-            'row.*.amount' => ['required','numeric', 'min:0', 'not_in:0'],
+            'product_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:products,id'],
+            'store_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:stores,id'],
+            'amount' => ['required','numeric', 'min:0', 'not_in:0'],
         ]);
         if($validator->fails()){
             return response()->json($validator->messages(), 400);
         }
 
         $data = $validator->valid();
-        // $item = new Price();
-        // $item->product_id = $data['product_id'];
-        // $item->store_id = $data['store_id'];
-        // $item->amount = $data['amount'];
-        // $item->save();
-        // $item->product->get();
-        // $item->store->get();
-        // return response()->json($item, 200);
-
-        return response()->json($data, 200);
+        $item = new Price();
+        $item->product_id = $data['product_id'];
+        $item->store_id = $data['store_id'];
+        $item->amount = $data['amount'];
+        $item->save();
+        $item->product->get();
+        $item->store->get();
+        return response()->json($item, 200);
     }
 
     /**
