@@ -85,11 +85,11 @@ class Prices extends Controller
             $item = $data;
             $item['created_at'] = date('Y-m-d H:i:s');
             $item['updated_at'] = date('Y-m-d H:i:s');
-            $prices[]=$data;
+            $prices[]=$item;
         }
         Price::insert($prices);
 
-        return response()->json($datas, 200);
+        return response()->json($prices, 200);
     }
 
     /**
@@ -191,8 +191,9 @@ class Prices extends Controller
         $item->store_id = $data['store_id'];
         $item->amount = $data['amount'];
         $item->save();
-        $item->category->get();
-
+        $item->product->get();
+        $item->store->get();
+        
         return response()->json($item, 200);
     }
 
