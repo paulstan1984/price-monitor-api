@@ -44,3 +44,6 @@ Route::patch('/prices', 'Prices@buy')->middleware('auth:api');
 Route::get('/prices/{id}', 'Prices@read')->middleware('auth:api');
 Route::put('/prices/{id}', 'Prices@update')->middleware('auth:api');
 Route::delete('/prices/{id}', 'Prices@destroy')->middleware('auth:api');
+
+Route::get('/shopping-list', 'ShoppingList@index')->middleware('auth:api');
+Route::put('/shopping-list', 'ShoppingList@create')->middleware('auth:api');
