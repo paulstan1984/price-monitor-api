@@ -47,3 +47,6 @@ Route::delete('/prices/{id}', 'Prices@destroy')->middleware('auth:api');
 
 Route::get('/shopping-list', 'ShoppingList@index')->middleware('auth:api');
 Route::put('/shopping-list', 'ShoppingList@create')->middleware('auth:api');
+
+
+Route::post('/shopping-list', 'ShoppingList@testOCR')->middleware('auth:api');
