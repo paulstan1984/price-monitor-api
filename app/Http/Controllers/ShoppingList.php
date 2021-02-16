@@ -46,7 +46,7 @@ class ShoppingList extends Controller
     
     public function testOCR() { 
 
-        $fileContent  = Storage::disk('local')->get('buletin.jpg');
+        $fileContent  = Storage::disk('local')->get('bon.jpg');
         
         $storagePath  = Storage::disk('local')->getDriver()->getAdapter()->getPathPrefix();
         putenv('GOOGLE_APPLICATION_CREDENTIALS='.$storagePath.'/GooglePlusMetrics-efbcd5738989.json');
@@ -54,9 +54,9 @@ class ShoppingList extends Controller
         $imageAnnotator = new ImageAnnotatorClient();
 
         # annotate the image
-        $response = $imageAnnotator->textDetection($fileContent);
-        $texts = $response->getTextAnnotations();
-    
+        $ocr_response = $imageAnnotator->textDetection($fileContent);
+        $texts = $ocr_response->getTextAnnotations();
+
         $response = [
             'count' => count($texts),
             'words' => []
