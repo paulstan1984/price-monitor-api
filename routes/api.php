@@ -48,5 +48,5 @@ Route::delete('/prices/{id}', 'Prices@destroy')->middleware('auth:api');
 Route::get('/shopping-list', 'ShoppingList@index')->middleware('auth:api');
 Route::put('/shopping-list', 'ShoppingList@create')->middleware('auth:api');
 
-
-Route::post('/shopping-list', 'ShoppingList@testOCR')->middleware('auth:api');
+Route::put('/recognize-invoice', 'Recognize@invoice')->middleware('auth:api');
+Route::put('/recognize-prices', 'Recognize@getPrices')->middleware('auth:api');
