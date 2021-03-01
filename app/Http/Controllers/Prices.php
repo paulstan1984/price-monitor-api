@@ -135,6 +135,10 @@ class Prices extends Controller
             $items = $this
                 ->paginationService
                 ->applyOrder($items, $data['order_by'], 'ASC', 'prices');
+        } else {
+            $items = $this
+                ->paginationService
+                ->applyOrder($items, 'id', 'DESC', 'prices');
         }
 
         $items = $this->paginationService->applyPagination($items, $data['page']);
