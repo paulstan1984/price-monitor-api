@@ -142,6 +142,7 @@ class Prices extends Controller
         }
 
         $items = $this->paginationService->applyPagination($items, $data['page']);
+
         
         return response()->json($items, 200);
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Product;
+use App\Price;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule; 
 use Illuminate\Support\Facades\Validator;
@@ -96,6 +97,12 @@ class Products extends Controller
         }
 
         $items = $this->paginationService->applyPagination($items, $data['page']);
+
+        foreach($items['results'] as &$product) {
+            $product['lastPrice'] = Price::getLastPrice($product['id']);
+            $product['avgPrice'] = Price::getAvgPrice($product['id']);
+            $product['stores'] = Price::getStores($product['id']);
+        }
         
         return response()->json($items, 200);
     }
