@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Price extends Model
 {
@@ -53,5 +54,45 @@ class Price extends Model
         }
         
         return implode(', ', $store_names);
+    }
+
+
+    public static function getStatistics($data) {
+        $query = Price::query(); 
+
+        if(!empty($data['ProductIds']) && is_array($data['ProductIds'])){
+            $query = $query->whereIn('product_id', $data['ProductIds']);
+        }
+
+        if(!empty($data['StoresIds']) && is_array($data['StoresIds'])){
+            $query = $query->whereIn('store_id', $data['StoresIds']);
+        }
+
+        if(!empty($data['StartDate'])){
+            $query = $query->where('prices.created_at', '>=', $data['StartDate']);
+        }
+
+        if(!empty($data['EndDate'])){
+            $query = $query->where('prices.created_at', '<=', $data['EndDate']);
+        }
+
+        $query = $query
+            ->join('stores', 'prices.store_id', '=', 'stores.id')
+            ->join('products', 'prices.product_id', '=', 'products.id')
+            ->select([
+                DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\') as Date'),
+                'stores.name as Store',
+                'products.name as Product',
+                DB::raw('max(prices.amount) as MaxPrice'),
+                DB::raw('avg(prices.amount) as AvgPrice'),
+            ])
+            ->groupBy([
+                DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\')'),
+                'stores.name',
+                'products.name'
+            ])
+            ->get();
+
+        return $query;
     }
 }

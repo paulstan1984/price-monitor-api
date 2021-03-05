@@ -50,3 +50,5 @@ Route::put('/shopping-list', 'ShoppingList@create')->middleware('auth:api');
 
 Route::put('/recognize-invoice', 'Recognize@invoice')->middleware('auth:api');
 Route::put('/recognize-prices', 'Recognize@getPrices')->middleware('auth:api');
+
+Route::post('/statistics', 'Statistics@search')->middleware('auth:api');

@@ -128,6 +128,7 @@ return [
     | specify a specific custom language line for a given attribute rule.
     |
     */
+    'numericarray' => 'The :attribute field should be an array of numeric values',
 
     'custom' => [
         'attribute-name' => [
@@ -148,4 +149,5 @@ return [
 
     'attributes' => [],
 
+    
 ];
