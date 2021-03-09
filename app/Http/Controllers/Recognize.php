@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Input;
-use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 
 const unwanted_array = array(    
 'Š'=>'S', 'š'=>'s', 'Ž'=>'Z', 'ž'=>'z', 'À'=>'A', 'Á'=>'A', 'Â'=>'A', 'Ã'=>'A', 'Ä'=>'A', 'Å'=>'A', 'Æ'=>'A', 'Ç'=>'C', 'È'=>'E', 'É'=>'E',
@@ -18,26 +17,70 @@ const unwanted_array = array(
 
 class Recognize extends Controller
 {
+    var $API_Key;
+    var $API_URL;
+
     public function __construct() {
         $storagePath  = Storage::disk('local')->getDriver()->getAdapter()->getPathPrefix();
         putenv('GOOGLE_APPLICATION_CREDENTIALS='.$storagePath.'/GooglePlusMetrics-efbcd5738989.json');
+        $this->API_Key = env('GOOGLE_API_KEY');
+        $this->API_URL = 'https://vision.googleapis.com/v1/images:annotate?key='.$this->API_Key;
+    }
+
+    function httpPost($url, $data)
+    {
+        // print json_encode($data);
+        // exit;
+        // Create a new cURL resource
+        $ch = curl_init($url);
+
+        $payload = json_encode($data);
+
+        // Attach encoded JSON string to the POST fields
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+
+        // Set the content type to application/json
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+
+        // Return response instead of outputting
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        // Execute the POST request
+        $result = curl_exec($ch);
+
+        // Close cURL resource
+        curl_close($ch);
+
+        return $result;
     }
 
     public function invoice(Request $request) { 
 
         $fileContent  = $request->getContent();
 
-        $imageAnnotator = new ImageAnnotatorClient();
+        $GoogleOCRRequest = (object) array(
+            'requests' => array(
+                (object) array(
+                    'image' => (object) array('content' => base64_encode($fileContent)),
+                    'features' => array(
+                        (object) array('type' => 'TEXT_DETECTION')
+                    )
+                )
+            )
+        );
 
-        # annotate the image
-        $ocr_response = $imageAnnotator->textDetection($fileContent);
-        $texts = $ocr_response->getTextAnnotations();
+        
+        
+        $response = json_decode($this->httpPost($this->API_URL, $GoogleOCRRequest), true);
 
-        //$lines = explode(PHP_EOL, $texts[0]->getDescription());
-        $lines = array_filter(preg_split('/\r\n|\r|\n/', $texts[0]->getDescription()), function($value) { return !empty($value);});
-        $imageAnnotator->close();
-    
-        return response()->json($lines, 200);
+        try{
+            $lines_str = $response['responses'][0]['textAnnotations'][0]['description'];
+            $lines = array_filter(preg_split('/\r\n|\r|\n/', $lines_str), function($value) { return !empty($value);});
+            return response()->json($lines, 200);
+        }
+        catch(Exception $ex){
+            return response()->json($ex, 400);
+        }
     }
 
     public function getPrices(Request $request) { 
