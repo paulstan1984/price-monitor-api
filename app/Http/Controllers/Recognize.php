@@ -175,19 +175,20 @@ class Recognize extends Controller
             }
         }
 
-        if($pos >= 0){
-            $price = 1;
-            for($i=1;$i<3;$i++) {
-                $price_pos = strpos(strtolower($lines[$pos+$i]), $price_marker);
-                if($price_pos !== FALSE){
-                    $price_line = substr($lines[$pos+$i], $price_pos + strlen($price_marker));
-                    $price_line = trim($price_line);
-                    $price_line = str_replace( '. ', '.', $price_line);
-                    $price = explode(' ', $price_line)[0];
-                }
+        if($pos - 1 >= 0){
+            $price_line_index = $pos - 1;
+            $numbers_array = explode(' ', $lines[$price_line_index]);
+            $numbers_array = array_filter($numbers_array, function($a){
+                $a = str_replace(',', '.', str_replace('.', '', $a));
+                return is_numeric($a);
+            });
+
+            if(count($numbers_array)>0){
+                $price_str = array_reverse($numbers_array)[0];
+                $price = floatval(str_replace(',', '.', str_replace('.', '', $price_str)));
             }
         }
 
-        return $price;
+        return round($price, 2);
     }
 }
