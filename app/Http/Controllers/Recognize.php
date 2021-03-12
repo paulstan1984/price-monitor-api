@@ -27,8 +27,7 @@ class Recognize extends Controller
         $this->API_URL = 'https://vision.googleapis.com/v1/images:annotate?key='.$this->API_Key;
     }
 
-    function httpPost($url, $data)
-    {
+    function httpPost($url, $data) {
         // print json_encode($data);
         // exit;
         // Create a new cURL resource
@@ -54,6 +53,19 @@ class Recognize extends Controller
         return $result;
     }
 
+    function get_line_index($word, $lines, $max_length){
+        
+        for($i=0;$i<count($lines);$i++){
+            for($j=0;$j<count($lines[$i]);$j++){
+                if(abs($lines[$i][$j]['y'] - $word['y']) <= $max_length) {
+                    return $i;
+                }
+            }
+        }
+
+        return -1;
+    }
+
     public function invoice(Request $request) { 
 
         $fileContent  = $request->getContent();
@@ -64,6 +76,7 @@ class Recognize extends Controller
                     'image' => (object) array('content' => base64_encode($fileContent)),
                     'features' => array(
                         (object) array('type' => 'TEXT_DETECTION')
+                        //(object) array('type' => 'DOCUMENT_TEXT_DETECTION')
                     )
                 )
             )
@@ -72,6 +85,51 @@ class Recognize extends Controller
         
         
         $response = json_decode($this->httpPost($this->API_URL, $GoogleOCRRequest), true);
+
+        $textAdnotations = array_slice($response['responses'][0]['textAnnotations'], 1);
+
+        $words = array();
+        foreach($textAdnotations as $adn){
+            $ys = [];
+            $minx = -1;
+            foreach($adn['boundingPoly']['vertices'] as $vertice){
+                $ys[]=$vertice['y'];
+                if($minx == -1 || $minx < $vertice['x']) {
+                    $minx = $vertice['x'];
+                }
+            }
+            $words[]=array(
+                'text' => $adn['description'],
+                'y' => round(array_sum($ys)/count($ys)),
+                'x' => $minx,
+            );
+        }
+        $lines = array();
+        $max_length = 10;
+        foreach($words as $word){
+            $line_index = $this->get_line_index($word, $lines, $max_length);
+            if($line_index > -1){
+                $lines[$line_index][]=$word;
+            } else {
+                $lines[]=array($word);
+            }
+        }
+        foreach($lines as &$line) {
+            usort($line, function($a, $b) {
+                return $a['x']-$b['x'];
+            });
+        };
+
+        $final_lines = array();
+        foreach($lines as $line){
+            $str = array();
+            foreach($line as $word){
+                $str[]=$word['text'];
+            }
+            $final_lines[]=implode(' ', $str);
+        }
+
+        return response()->json($final_lines, 200);
 
         try{
             $lines_str = $response['responses'][0]['textAnnotations'][0]['description'];
