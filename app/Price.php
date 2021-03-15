@@ -60,8 +60,8 @@ class Price extends Model
     public static function getStatistics($data) {
         $query = Price::query(); 
 
-        if(!empty($data['ProductIds']) && is_array($data['ProductIds'])){
-            $query = $query->whereIn('product_id', $data['ProductIds']);
+        if(!empty($data['ProductsIds']) && is_array($data['ProductsIds'])){
+            $query = $query->whereIn('product_id', $data['ProductsIds']);
         }
 
         if(!empty($data['StoresIds']) && is_array($data['StoresIds'])){
@@ -85,11 +85,15 @@ class Price extends Model
                 'products.name as Product',
                 DB::raw('max(prices.amount) as MaxPrice'),
                 DB::raw('avg(prices.amount) as AvgPrice'),
+                'products.id as ProductId',
+                'stores.id as StoreId',
             ])
             ->groupBy([
                 DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\')'),
                 'stores.name',
-                'products.name'
+                'products.name',
+                'products.id',
+                'stores.id',
             ])
             ->get();
 

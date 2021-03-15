@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Price;
+use App\Product;
+use App\Store;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule; 
 use Illuminate\Support\Facades\Validator;
@@ -17,6 +19,48 @@ Validator::extend('numericarray', function($attribute, $value, $parameters)
 
 class Statistics extends Controller
 {
+    private function getDetailedStats($pId, $sId, $stats) {
+        $returnData = array();
+        foreach($stats as $d){
+            if($d['ProductId']==$pId && $d['StoreId']==$sId){
+                $returnData[]=(object)array(
+                    "name" => date('Y-m-d', strtotime($d['Date'])),
+                    "value" => $d['MaxPrice'],
+                );
+            }
+        }
+
+        return $returnData;
+    }
+
+    private function getDetailedStoreStats($sId, $stats) {
+        $returnData = array();
+        foreach($stats as $d){
+            if($d['StoreId']==$sId){
+                $returnData[]=(object)array(
+                    "name" => date('Y-m-d', strtotime($d['Date'])),
+                    "value" => $d['MaxPrice'],
+                );
+            }
+        }
+
+        return $returnData;
+    }
+
+    private function getDetailedProductStats($pId, $stats) {
+        $returnData = array();
+        foreach($stats as $d){
+            if($d['ProductId']==$pId){
+                $returnData[]=(object)array(
+                    "name" => date('Y-m-d', strtotime($d['Date'])),
+                    "value" => $d['MaxPrice'],
+                );
+            }
+        }
+
+        return $returnData;
+    }
+
     /**
      * Search products
      *
@@ -28,7 +72,7 @@ class Statistics extends Controller
         $validator = Validator::make($request->all(), [
             'StartDate' => ['date', 'nullable'],
             'EndDate' => ['date', 'nullable'],
-            'ProductIds' => ['array', 'numericarray'],
+            'ProductsIds' => ['array', 'numericarray'],
             'StoresIds' => ['array', 'numericarray'],
         ]);
         if($validator->fails()){
@@ -38,80 +82,57 @@ class Statistics extends Controller
         $data = $validator->valid();
         $stats = Price::getStatistics($data);
 
-        // should format the response as follow
-        // multi = [
-        //     {
-        //       "name": "Igienol / Profi",
-        //       "series": [
-        //         {
-        //           "name": "2021-01",
-        //           "value": 4
-        //         },
-        //         {
-        //           "name": "2021-02",
-        //           "value": 5
-        //         },
-        //         {
-        //           "name": "2021-03",
-        //           "value": 6
-        //         }
-        //       ]
-        //     },
-        
-        //     {
-        //       "name": "Igienol / Lidl",
-        //       "series": [
-        //         {
-        //           "name": "2021-01",
-        //           "value": 4.2
-        //         },
-        //         {
-        //           "name": "2021-02",
-        //           "value": 4.1
-        //         },
-        //         {
-        //           "name": "2021-03",
-        //           "value": 6.7
-        //         }
-        //       ]
-        //     },
-        
-        //     {
-        //       "name": "Pâine / Profi",
-        //       "series": [
-        //         {
-        //           "name": "2021-01",
-        //           "value": 5
-        //         },
-        //         {
-        //           "name": "2021-02",
-        //           "value": 5
-        //         },
-        //         {
-        //           "name": "2021-03",
-        //           "value": 6
-        //         }
-        //       ]
-        //     },
-        //     {
-        //       "name": "Pâine / Lidl",
-        //       "series": [
-        //         {
-        //           "name": "2021-01",
-        //           "value": 6
-        //         },
-        //         {
-        //           "name": "2021-02",
-        //           "value": 5
-        //         },
-        //         {
-        //           "name": "2021-03",
-        //           "value": 6
-        //         }
-        //       ]
-        //     }
-        //   ];
+        $formated_stats = array();
+        if(!empty($data['ProductsIds']) && !empty($data['StoresIds'])){
+            foreach($data['ProductsIds'] as $pId) {
+                foreach($data['StoresIds'] as $sId) {
+                    $detailedStats = $this->getDetailedStats($pId, $sId, $stats);
+                    $title_arr = array();
+                    $store = Store::where('id', $sId)->first();
+                    if($store!=null){
+                        $title_arr[]=$store->name;
+                    }
+                    $product = Product::where('id', $pId)->first();
+                    if($product!=null){
+                        $title_arr[]=$product->name;
+                    }
 
-        return response()->json($stats, 200);
+                    $formated_stats[]=(object)array(
+                        'name' => implode(' / ', $title_arr),
+                        'series' => $detailedStats,
+                    );
+                }
+            }
+        } else if (!empty($data['ProductsIds']) && empty($data['StoresIds'])){
+            foreach($data['ProductsIds'] as $pId) {
+                $detailedStats = $this->getDetailedProductStats($pId, $stats);
+                $title_arr = array();
+                $product = Product::where('id', $pId)->first();
+                if($product!=null){
+                    $title_arr[]=$product->name;
+                }
+
+                $formated_stats[]=(object)array(
+                    'name' => implode(' / ', $title_arr),
+                    'series' => $detailedStats,
+                );
+            }
+        } else if (empty($data['ProductsIds']) && !empty($data['StoresIds'])){
+            foreach($data['StoresIds'] as $sId) {
+                $detailedStats = $this->getDetailedStoreStats($sId, $stats);
+                $title_arr = array();
+                $store = Store::where('id', $sId)->first();
+                if($store!=null){
+                    $title_arr[]=$store->name;
+                }
+                
+                $formated_stats[]=(object)array(
+                    'name' => implode(' / ', $title_arr),
+                    'series' => $detailedStats,
+                );
+            }
+        }
+        
+        return response()->json($formated_stats, 200);
     }
 }
