@@ -60,12 +60,35 @@ class Price extends Model
     public static function getStatistics($data) {
         $query = Price::query(); 
 
+        $select_cols = [
+            DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\') as Date'),
+            DB::raw('max(prices.amount) as MaxPrice'),
+            DB::raw('avg(prices.amount) as AvgPrice'),
+        ];
+
+        $group_by_cols = [
+            DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\')'),
+        ];
+
         if(!empty($data['ProductsIds']) && is_array($data['ProductsIds'])){
             $query = $query->whereIn('product_id', $data['ProductsIds']);
+            
+            $select_cols []= 'products.id as ProductId';
+            $select_cols []= 'products.name as Product';
+
+            $group_by_cols []= 'products.id';
+            $group_by_cols []= 'products.name';
+            
         }
 
         if(!empty($data['StoresIds']) && is_array($data['StoresIds'])){
             $query = $query->whereIn('store_id', $data['StoresIds']);
+            
+            $select_cols []= 'stores.id as StoreId';
+            $select_cols []= 'stores.name as Store';
+            
+            $group_by_cols []= 'stores.id';
+            $group_by_cols []= 'stores.name';
         }
 
         if(!empty($data['StartDate'])){
@@ -79,22 +102,8 @@ class Price extends Model
         $query = $query
             ->join('stores', 'prices.store_id', '=', 'stores.id')
             ->join('products', 'prices.product_id', '=', 'products.id')
-            ->select([
-                DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\') as Date'),
-                'stores.name as Store',
-                'products.name as Product',
-                DB::raw('max(prices.amount) as MaxPrice'),
-                DB::raw('avg(prices.amount) as AvgPrice'),
-                'products.id as ProductId',
-                'stores.id as StoreId',
-            ])
-            ->groupBy([
-                DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\')'),
-                'stores.name',
-                'products.name',
-                'products.id',
-                'stores.id',
-            ])
+            ->select($select_cols)
+            ->groupBy($group_by_cols)
             ->get();
 
         return $query;
