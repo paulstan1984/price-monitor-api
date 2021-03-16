@@ -76,7 +76,6 @@ class Recognize extends Controller
                     'image' => (object) array('content' => base64_encode($fileContent)),
                     'features' => array(
                         (object) array('type' => 'TEXT_DETECTION')
-                        //(object) array('type' => 'DOCUMENT_TEXT_DETECTION')
                     )
                 )
             )
