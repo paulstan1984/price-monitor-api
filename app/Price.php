@@ -105,7 +105,7 @@ class Price extends Model
             ->join('products', 'prices.product_id', '=', 'products.id')
             ->select($select_cols)
             ->groupBy($group_by_cols)
-            ->orderBy([DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\')')])
+            ->orderBy(DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\')'))
             ->get();
 
         return $query;
