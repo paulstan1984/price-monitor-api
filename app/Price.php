@@ -64,6 +64,7 @@ class Price extends Model
             DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\') as Date'),
             DB::raw('max(prices.amount) as MaxPrice'),
             DB::raw('avg(prices.amount) as AvgPrice'),
+            DB::raw('sum(prices.amount) as Total'),
         ];
 
         $group_by_cols = [
@@ -104,6 +105,7 @@ class Price extends Model
             ->join('products', 'prices.product_id', '=', 'products.id')
             ->select($select_cols)
             ->groupBy($group_by_cols)
+            ->orderBy([DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\')')])
             ->get();
 
         return $query;

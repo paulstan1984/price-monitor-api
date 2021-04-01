@@ -83,6 +83,7 @@ class Statistics extends Controller
         $stats = Price::getStatistics($data);
 
         $formated_stats = array();
+        //stats by store and prod
         if(!empty($data['ProductsIds']) && !empty($data['StoresIds'])){
             foreach($data['ProductsIds'] as $pId) {
                 foreach($data['StoresIds'] as $sId) {
@@ -103,6 +104,7 @@ class Statistics extends Controller
                     );
                 }
             }
+        // stats by prod
         } else if (!empty($data['ProductsIds']) && empty($data['StoresIds'])){
             foreach($data['ProductsIds'] as $pId) {
                 $detailedStats = $this->getDetailedProductStats($pId, $stats);
@@ -117,6 +119,7 @@ class Statistics extends Controller
                     'series' => $detailedStats,
                 );
             }
+        // stats by store
         } else if (empty($data['ProductsIds']) && !empty($data['StoresIds'])){
             foreach($data['StoresIds'] as $sId) {
                 $detailedStats = $this->getDetailedStoreStats($sId, $stats);
