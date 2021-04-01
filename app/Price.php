@@ -62,9 +62,9 @@ class Price extends Model
 
         $select_cols = [
             DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\') as Date'),
-            DB::raw('max(prices.amount) as MaxPrice'),
-            DB::raw('avg(prices.amount) as AvgPrice'),
-            DB::raw('sum(prices.amount) as Total'),
+            DB::raw('ROUND(max(prices.amount), 2) as MaxPrice'),
+            DB::raw('ROUND(avg(prices.amount), 2) as AvgPrice'),
+            DB::raw('ROUND(sum(prices.amount), 2) as TotalPrice'),
         ];
 
         $group_by_cols = [

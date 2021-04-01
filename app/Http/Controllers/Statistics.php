@@ -39,7 +39,7 @@ class Statistics extends Controller
             if($d['StoreId']==$sId){
                 $returnData[]=(object)array(
                     "name" => date('Y-m-d', strtotime($d['Date'])),
-                    "value" => $d['MaxPrice'],
+                    "value" => $d['TotalPrice'],
                 );
             }
         }
@@ -53,7 +53,7 @@ class Statistics extends Controller
             if($d['ProductId']==$pId){
                 $returnData[]=(object)array(
                     "name" => date('Y-m-d', strtotime($d['Date'])),
-                    "value" => $d['MaxPrice'],
+                    "value" => $d['AvgPrice'],
                 );
             }
         }
