@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Middleware;
-use Illuminate\Support\Facades\Log;
+use App\User;
 
 class Authenticate 
 {
@@ -10,9 +10,17 @@ class Authenticate
         return md5(env('ADMIN_PASSWORD').env('ADMIN_KEY'));
     }
 
+    public static function computeUserToken(User $user) {
+        return md5($user->username.$user->password.time().env('ADMIN_KEY'));
+    }
+
     public function handle($request, $next)
     {
-        if($request->header('authorization') == Authenticate::getToken()) {
+        $user = User::where('token', $request->header('authorization'))
+            ->orWhere('mobile_token', $request->header('mobile'))
+            ->first();
+
+        if($user != null) {
             return  $next($request);
         }
 

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Price;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule; 
 use Illuminate\Support\Facades\Validator;
 use App\Services\PaginationService;
 

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('/login', 'Users@login');
+Route::post('/logout', 'Users@logout');
 
 Route::get('/stores', 'Stores@index')->middleware('auth:api');
 Route::post('/stores', 'Stores@search')->middleware('auth:api');
