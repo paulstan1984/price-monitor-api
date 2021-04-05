@@ -21,14 +21,32 @@ class Users extends Controller
             ->where('password', $password)
             ->first();
 
-        // if($password == env('ADMIN_PASSWORD')) {
-        //     return response()->json(['token'=>Authenticate::getToken()], 200);
-        // }
-
         if($user != null) {
             $user->token = Authenticate::computeUserToken($user);
             $user->save();
             return response()->json(['token'=>$user->token], 200);
+        }
+
+        return response()->json(['Password'=>'Invalid login!'], 400);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function mobile_login(Request $request)
+    {
+        $username = $request->get('Username');
+        $password = $request->get('Password');
+        $user = User::where('username', $username)
+            ->where('password', $password)
+            ->first();
+
+        if($user != null) {
+            $user->mobile_token = Authenticate::computeUserToken($user);
+            $user->save();
+            return response()->json(['token'=>$user->mobile_token], 200);
         }
 
         return response()->json(['Password'=>'Invalid login!'], 400);

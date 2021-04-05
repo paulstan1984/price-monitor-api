@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('/login', 'Users@login');
+Route::post('/login/mobile', 'Users@mobile_login');
 Route::post('/logout', 'Users@logout');
 
 Route::get('/stores', 'Stores@index')->middleware('auth:api');
