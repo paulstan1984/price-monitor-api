@@ -62,6 +62,9 @@ class Price extends Model
 
     public static function getStatistics($data, $groupByDates = true)
     {
+        $data['StartDate'] = date('Y-m-d', strtotime($data['StartDate']));
+        $data['EndDate'] = date('Y-m-d', strtotime($data['EndDate']));
+        
         $query = Price::query();
 
         $select_cols = [];

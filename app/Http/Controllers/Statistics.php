@@ -6,24 +6,23 @@ use App\Price;
 use App\Product;
 use App\Store;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule; 
 use Illuminate\Support\Facades\Validator;
 
-Validator::extend('numericarray', function($attribute, $value, $parameters)
-{
-    foreach($value as $v) {
-        if(!is_int($v)) return false;
+Validator::extend('numericarray', function ($attribute, $value, $parameters) {
+    foreach ($value as $v) {
+        if (!is_int($v)) return false;
     }
     return true;
 });
 
 class Statistics extends Controller
 {
-    private function getDetailedStats($pId, $sId, $stats) {
+    private function getDetailedStats($pId, $sId, $stats)
+    {
         $returnData = array();
-        foreach($stats as $d){
-            if($d['ProductId']==$pId && $d['StoreId']==$sId){
-                $returnData[]=(object)array(
+        foreach ($stats as $d) {
+            if ($d['ProductId'] == $pId && $d['StoreId'] == $sId) {
+                $returnData[] = (object)array(
                     "name" => date('Y-m-d', strtotime($d['Date'])),
                     "value" => $d['MaxPrice'],
                 );
@@ -33,11 +32,12 @@ class Statistics extends Controller
         return $returnData;
     }
 
-    private function getDetailedStoreStats($sId, $stats) {
+    private function getDetailedStoreStats($sId, $stats)
+    {
         $returnData = array();
-        foreach($stats as $d){
-            if($d['StoreId']==$sId){
-                $returnData[]=(object)array(
+        foreach ($stats as $d) {
+            if ($d['StoreId'] == $sId) {
+                $returnData[] = (object)array(
                     "name" => date('Y-m-d', strtotime($d['Date'])),
                     "value" => $d['TotalPrice'],
                 );
@@ -47,11 +47,12 @@ class Statistics extends Controller
         return $returnData;
     }
 
-    private function getDetailedProductStats($pId, $stats) {
+    private function getDetailedProductStats($pId, $stats)
+    {
         $returnData = array();
-        foreach($stats as $d){
-            if($d['ProductId']==$pId){
-                $returnData[]=(object)array(
+        foreach ($stats as $d) {
+            if ($d['ProductId'] == $pId) {
+                $returnData[] = (object)array(
                     "name" => date('Y-m-d', strtotime($d['Date'])),
                     "value" => $d['AvgPrice'],
                 );
@@ -59,6 +60,19 @@ class Statistics extends Controller
         }
 
         return $returnData;
+    }
+
+    private function getDetailedTotalStats($stats)
+    {
+        $totals = [];
+        foreach ($stats as $s) {
+            $totals[] = (object)array(
+                "name" => date('Y-m-d', strtotime($s['Date'])),
+                "value" => $s['TotalPrice'],
+            );
+        }
+
+        return $totals;
     }
 
     /**
@@ -75,7 +89,7 @@ class Statistics extends Controller
             'ProductsIds' => ['array', 'numericarray'],
             'StoresIds' => ['array', 'numericarray'],
         ]);
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json($validator->messages(), 400);
         }
 
@@ -84,58 +98,66 @@ class Statistics extends Controller
 
         $formated_stats = array();
         //stats by store and prod
-        if(!empty($data['ProductsIds']) && !empty($data['StoresIds'])){
-            foreach($data['ProductsIds'] as $pId) {
-                foreach($data['StoresIds'] as $sId) {
+        if (!empty($data['ProductsIds']) && !empty($data['StoresIds'])) {
+            foreach ($data['ProductsIds'] as $pId) {
+                foreach ($data['StoresIds'] as $sId) {
                     $detailedStats = $this->getDetailedStats($pId, $sId, $stats);
                     $title_arr = array();
                     $store = Store::where('id', $sId)->first();
-                    if($store!=null){
-                        $title_arr[]=$store->name;
+                    if ($store != null) {
+                        $title_arr[] = $store->name;
                     }
                     $product = Product::where('id', $pId)->first();
-                    if($product!=null){
-                        $title_arr[]=$product->name;
+                    if ($product != null) {
+                        $title_arr[] = $product->name;
                     }
 
-                    $formated_stats[]=(object)array(
+                    $formated_stats[] = (object)array(
                         'name' => implode(' / ', $title_arr),
                         'series' => $detailedStats,
                     );
                 }
             }
-        // stats by prod
-        } else if (!empty($data['ProductsIds']) && empty($data['StoresIds'])){
-            foreach($data['ProductsIds'] as $pId) {
+            // stats by prod
+        } else if (!empty($data['ProductsIds']) && empty($data['StoresIds'])) {
+            foreach ($data['ProductsIds'] as $pId) {
                 $detailedStats = $this->getDetailedProductStats($pId, $stats);
                 $title_arr = array();
                 $product = Product::where('id', $pId)->first();
-                if($product!=null){
-                    $title_arr[]=$product->name;
+                if ($product != null) {
+                    $title_arr[] = $product->name;
                 }
 
-                $formated_stats[]=(object)array(
+                $formated_stats[] = (object)array(
                     'name' => implode(' / ', $title_arr),
                     'series' => $detailedStats,
                 );
             }
-        // stats by store
-        } else if (empty($data['ProductsIds']) && !empty($data['StoresIds'])){
-            foreach($data['StoresIds'] as $sId) {
+            // stats by store
+        } else if (empty($data['ProductsIds']) && !empty($data['StoresIds'])) {
+            foreach ($data['StoresIds'] as $sId) {
                 $detailedStats = $this->getDetailedStoreStats($sId, $stats);
                 $title_arr = array();
                 $store = Store::where('id', $sId)->first();
-                if($store!=null){
-                    $title_arr[]=$store->name;
+                if ($store != null) {
+                    $title_arr[] = $store->name;
                 }
-                
-                $formated_stats[]=(object)array(
+
+                $formated_stats[] = (object)array(
                     'name' => implode(' / ', $title_arr),
                     'series' => $detailedStats,
                 );
             }
         }
-        
+        //stats by totals
+        else {
+
+            $formated_stats[] = (object)array(
+                'name' => 'Total',
+                'series' => $this->getDetailedTotalStats($stats)
+            );
+        }
+
         return response()->json($formated_stats, 200);
     }
 }

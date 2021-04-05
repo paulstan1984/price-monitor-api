@@ -65,9 +65,8 @@ class Users extends Controller
         if($user != null) {
             $user->token = '';
             $user->save();
-            return response()->json(['loggedout'=>true], 200);
         }
 
-        return response(json_encode(['Error'=>'Invalid token!']), 403);
+        return response()->json(['loggedout'=>true], 200);
     }
 }
