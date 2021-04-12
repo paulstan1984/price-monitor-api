@@ -60,16 +60,19 @@ class Price extends Model
     }
 
 
-    public static function getStatistics($data, $groupByDates = true)
+    public static function getStatistics($data, $groupingType = 'day')
     {
         $data['StartDate'] = date('Y-m-d', strtotime($data['StartDate']));
-        $data['EndDate'] = date('Y-m-d', strtotime($data['EndDate']));
+        $data['EndDate'] = date('Y-m-d', strtotime($data['EndDate'] . ' +1 day'));
         
         $query = Price::query();
 
         $select_cols = [];
-        if ($groupByDates) {
+        if ($groupingType == 'day') {
             $select_cols[] = DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\') as Date');
+        }
+        else if ($groupingType == 'month') {
+            $select_cols[] = DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m\') as Date');
         }
 
         $select_cols = array_merge($select_cols, [
@@ -79,8 +82,11 @@ class Price extends Model
         ]);
 
         $group_by_cols = [];
-        if ($groupByDates) {
+        if ($groupingType == 'day') {
             $group_by_cols[] = DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\')');
+        }
+        else if ($groupingType == 'month') {
+            $group_by_cols[] = DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m\')');
         }
 
         if (!empty($data['ProductsIds']) && is_array($data['ProductsIds'])) {
@@ -114,11 +120,17 @@ class Price extends Model
         $query = $query
             ->join('stores', 'prices.store_id', '=', 'stores.id')
             ->join('products', 'prices.product_id', '=', 'products.id')
-            ->select($select_cols)
-            ->groupBy($group_by_cols);
+            ->select($select_cols);
 
-        if($groupByDates) {
+        if(count($group_by_cols)>0) {
+            $query = $query->groupBy($group_by_cols);
+        }
+
+        if ($groupingType == 'day') {
             $query = $query->orderBy(DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\')'));
+        }
+        else if ($groupingType == 'month') {
+            $query = $query->orderBy(DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m\')'));
         }
             
         $query = $query->get();

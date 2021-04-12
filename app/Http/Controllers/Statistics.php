@@ -75,6 +75,19 @@ class Statistics extends Controller
         return $totals;
     }
 
+    private function getTotalDetails($stats)
+    {
+        $totals = [];
+        foreach ($stats as $s) {
+            $totals[] = (object)array(
+                "name" => sprintf("%s%s", $s['Store'], !empty($s['Product']) ? (' / ' . $s['Product']) : null),
+                "value" => $s['TotalPrice'],
+            );
+        }
+
+        return $totals;
+    }
+
     /**
      * Search products
      *
@@ -88,17 +101,34 @@ class Statistics extends Controller
             'EndDate' => ['date', 'nullable'],
             'ProductsIds' => ['array', 'numericarray'],
             'StoresIds' => ['array', 'numericarray'],
+            'GrouppingType' => ['string', 'required']
         ]);
         if ($validator->fails()) {
             return response()->json($validator->messages(), 400);
         }
 
         $data = $validator->valid();
-        $stats = Price::getStatistics($data);
+
+        if($data['GrouppingType']=='month') {
+            $stats = Price::getStatistics($data, 'month');
+        }
+        else if ($data['GrouppingType']=='none') {
+            $stats = Price::getStatistics($data, 'none');
+        }
+        else {
+            $stats = Price::getStatistics($data);
+        }
 
         $formated_stats = array();
+
+        if($data['GrouppingType']=='none') {
+            $formated_stats[] = (object)array(
+                'name' => 'Total',
+                'series' => $this->getTotalDetails($stats)
+            );
+        }
         //stats by store and prod
-        if (!empty($data['ProductsIds']) && !empty($data['StoresIds'])) {
+        else if (!empty($data['ProductsIds']) && !empty($data['StoresIds'])) {
             foreach ($data['ProductsIds'] as $pId) {
                 foreach ($data['StoresIds'] as $sId) {
                     $detailedStats = $this->getDetailedStats($pId, $sId, $stats);
