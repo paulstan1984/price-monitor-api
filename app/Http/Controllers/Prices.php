@@ -105,6 +105,7 @@ class Prices extends Controller
             'order_by' => ['string'],
             'order_dir' => ['string'],
             'page' => ['required','numeric', 'min:1'],
+            'page_size' => ['numeric']
         ]);
         if($validator->fails()){
             return response()->json($validator->messages(), 400);
@@ -140,7 +141,7 @@ class Prices extends Controller
                 ->applyOrder($items, 'id', 'DESC', 'prices');
         }
 
-        $items = $this->paginationService->applyPagination($items, $data['page']);
+        $items = $this->paginationService->applyPagination($items, $data['page'], !empty($data['page_size'])?$data['page_size']:0);
 
         
         return response()->json($items, 200);

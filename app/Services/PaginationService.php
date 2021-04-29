@@ -10,18 +10,22 @@ class PaginationService {
         $this->PageSize = (int)env('PAGE_SIZE', 20);
     }
 
-    function applyPagination($query, $page){
+    function applyPagination($query, $page, $PageSize = 0) {
 
+        if($PageSize == 0) {
+            $PageSize = $this->PageSize;
+        }
+        
         $count = $query->count();
 
         return [
             'count'    => $count,
             'page'     => $page,
-            'page_size'=> $this->PageSize,
+            'page_size'=> $PageSize,
             'nr_pages' => ceil($count / $this->PageSize),
             'results'  => $query
                         ->skip(($page - 1) * $this->PageSize)
-                        ->take($this->PageSize)
+                        ->take($PageSize)
                         ->get()
         ];
     }
