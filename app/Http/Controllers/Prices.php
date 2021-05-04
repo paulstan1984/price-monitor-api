@@ -6,6 +6,7 @@ use App\Price;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Services\PaginationService;
+use Illuminate\Support\Facades\DB;
 
 class Prices extends Controller
 {
@@ -105,7 +106,8 @@ class Prices extends Controller
             'order_by' => ['string'],
             'order_dir' => ['string'],
             'page' => ['required','numeric', 'min:1'],
-            'page_size' => ['numeric']
+            'page_size' => ['numeric'],
+            'date' => ['string']
         ]);
         if($validator->fails()){
             return response()->json($validator->messages(), 400);
@@ -127,6 +129,19 @@ class Prices extends Controller
             });
         }
 
+        if(!empty($data['date'])){
+
+            if(strlen($data['date']) == 7){
+                $items = $items->where(
+                    DB::raw("DATE_FORMAT(created_at, '%Y-%m')"), '=', $data['date']
+                );
+            } else {
+                $items = $items->where(
+                    DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d')"), '=', $data['date']
+                );
+            }
+        }
+        
         if(!empty($data['order_by']) && !empty($data['order_by_dir'])) {
             $items = $this
                 ->paginationService
