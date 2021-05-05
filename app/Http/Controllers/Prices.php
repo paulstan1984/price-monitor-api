@@ -133,11 +133,11 @@ class Prices extends Controller
 
             if(strlen($data['date']) == 7){
                 $items = $items->where(
-                    DB::raw("DATE_FORMAT(created_at, '%Y-%m')"), '=', $data['date']
+                    DB::raw("DATE_FORMAT(prices.created_at, '%Y-%m')"), '=', $data['date']
                 );
             } else {
                 $items = $items->where(
-                    DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d')"), '=', $data['date']
+                    DB::raw("DATE_FORMAT(prices.created_at, '%Y-%m-%d')"), '=', $data['date']
                 );
             }
         }
