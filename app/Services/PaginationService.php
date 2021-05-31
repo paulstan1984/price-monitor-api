@@ -22,9 +22,9 @@ class PaginationService {
             'count'    => $count,
             'page'     => $page,
             'page_size'=> $PageSize,
-            'nr_pages' => ceil($count / $this->PageSize),
+            'nr_pages' => ceil($count / $PageSize),
             'results'  => $query
-                        ->skip(($page - 1) * $this->PageSize)
+                        ->skip(($page - 1) * $PageSize)
                         ->take($PageSize)
                         ->get()
         ];
