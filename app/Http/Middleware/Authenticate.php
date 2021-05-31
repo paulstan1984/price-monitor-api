@@ -21,6 +21,7 @@ class Authenticate
             ->first();
 
         if($user != null) {
+            $request->attributes->set("user_id", $user->id);
             return  $next($request);
         }
 

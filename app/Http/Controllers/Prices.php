@@ -55,6 +55,7 @@ class Prices extends Controller
         $item->product_id = $data['product_id'];
         $item->store_id = $data['store_id'];
         $item->amount = $data['amount'];
+        $item->created_by = $request->attributes->get('user_id');
         $item->save();
         $item->product->get();
         $item->store->get();
@@ -85,6 +86,7 @@ class Prices extends Controller
             $item = $data;
             $item['created_at'] = date('Y-m-d H:i:s');
             $item['updated_at'] = date('Y-m-d H:i:s');
+            $item['created_by'] = $request->attributes->get('user_id');
             $prices[]=$item;
         }
         Price::insert($prices);
@@ -140,6 +142,14 @@ class Prices extends Controller
                     DB::raw("DATE_FORMAT(prices.created_at, '%Y-%m-%d')"), '=', $data['date']
                 );
             }
+        }
+
+        $created_by = $request->attributes->get('user_id');
+        if($created_by > 0) {
+            
+            $items = $items->where(
+                DB::raw("created_by", '=', $created_by)
+            );
         }
         
         if(!empty($data['order_by']) && !empty($data['order_by_dir'])) {

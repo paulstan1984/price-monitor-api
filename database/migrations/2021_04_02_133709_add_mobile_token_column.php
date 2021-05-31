@@ -26,7 +26,7 @@ class AddMobileTokenColumn extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->removeColumn('token');
+            $table->removeColumn('mobile_token');
         });
     }
 }
