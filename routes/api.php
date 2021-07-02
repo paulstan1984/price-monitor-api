@@ -18,6 +18,13 @@ Route::post('/login', 'Users@login');
 Route::post('/login/mobile', 'Users@mobile_login');
 Route::post('/logout', 'Users@logout');
 
+Route::get('/users', 'Users@index')->middleware('auth:api');
+Route::post('/users', 'Users@search')->middleware('auth:api');
+Route::put('/users', 'Users@create')->middleware('auth:api');
+Route::get('/users/{id}', 'Users@read')->middleware('auth:api');
+Route::put('/users/{id}', 'Users@update')->middleware('auth:api');
+Route::delete('/users/{id}', 'Users@destroy')->middleware('auth:api');
+
 Route::get('/stores', 'Stores@index')->middleware('auth:api');
 Route::post('/stores', 'Stores@search')->middleware('auth:api');
 Route::put('/stores', 'Stores@create')->middleware('auth:api');
