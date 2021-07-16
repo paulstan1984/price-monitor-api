@@ -23,7 +23,7 @@ class Statistics extends Controller
             if ($d['ProductId'] == $pId) {
                 $returnData[] = (object)array(
                     "name" => date('Y-m-d', strtotime($d['Date'])),
-                    "value" => $d['AvgPrice'],
+                    "value" => $d['TotalPrice'],
                 );
             }
         }
@@ -77,15 +77,16 @@ class Statistics extends Controller
 
         $data = $validator->valid();
         $created_by = $request->attributes->get('user_id');
+        $is_admin = $request->attributes->get('admin');
         
         if($data['GrouppingType']=='month') {
-            $stats = Price::getStatistics($data, 'month', $created_by);
+            $stats = Price::getStatistics($data, 'month', !$is_admin ? $created_by : 0);
         }
         else if ($data['GrouppingType']=='none') {
-            $stats = Price::getStatistics($data, 'none', $created_by);
+            $stats = Price::getStatistics($data, 'none', !$is_admin ? $created_by : 0);
         }
         else {
-            $stats = Price::getStatistics($data, 'day', $created_by);
+            $stats = Price::getStatistics($data, 'day', !$is_admin ? $created_by : 0);
         }
 
         $formated_stats = array();

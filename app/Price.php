@@ -81,11 +81,11 @@ class Price extends Model
         }
 
         if (!empty($data['StartDate'])) {
-            $query = $query->where('prices.created_at', '>=', $data['StartDate']);
+            $query = $query->where(DB::raw('prices.created_at'), '>=', $data['StartDate']);
         }
 
         if (!empty($data['EndDate'])) {
-            $query = $query->where('prices.created_at', '<=', $data['EndDate']);
+            $query = $query->where(DB::raw('prices.created_at'), '<=', $data['EndDate']);
         }
 
         $query = $query

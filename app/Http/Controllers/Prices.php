@@ -133,7 +133,9 @@ class Prices extends Controller
         }
 
         $created_by = $request->attributes->get('user_id');
-        if($created_by > 0) {
+        $is_admin = $request->attributes->get('admin');
+
+        if(!$is_admin && $created_by > 0) {
             
             $items = $items->where("created_by", '=', $created_by);
         }
