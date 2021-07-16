@@ -27,7 +27,6 @@ class Prices extends Controller
     {
         $prices = Price::all();
         foreach($prices as $item){
-            $item->store->get();
             $item->product->get();
         }
         return response()->json($prices, 200);
@@ -43,7 +42,6 @@ class Prices extends Controller
     {
         $validator = Validator::make($request->all(), [
             'product_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:products,id'],
-            'store_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:stores,id'],
             'amount' => ['required','numeric', 'min:0', 'not_in:0'],
         ]);
         if($validator->fails()){
@@ -53,12 +51,10 @@ class Prices extends Controller
         $data = $validator->valid();
         $item = new Price();
         $item->product_id = $data['product_id'];
-        $item->store_id = $data['store_id'];
         $item->amount = $data['amount'];
         $item->created_by = $request->attributes->get('user_id');
         $item->save();
         $item->product->get();
-        $item->store->get();
         return response()->json($item, 200);
     }
 
@@ -72,7 +68,6 @@ class Prices extends Controller
     {
         $validator = Validator::make($request->all(), [
             '*.product_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:products,id'],
-            '*.store_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:stores,id'],
             '*.amount' => ['required','numeric', 'min:0', 'not_in:0'],
         ]);
         if($validator->fails()){
@@ -104,7 +99,6 @@ class Prices extends Controller
     {
         $validator = Validator::make($request->all(), [
             'product' => ['string', 'nullable'],
-            'store' => ['string', 'nullable'],
             'order_by' => ['string'],
             'order_dir' => ['string'],
             'page' => ['required','numeric', 'min:1'],
@@ -117,17 +111,11 @@ class Prices extends Controller
 
         $data = $validator->valid();
         
-        $items = Price::query()->with(['product', 'store']);
+        $items = Price::query()->with(['product']);
 
         if(!empty($data['product'])){
             $items = $items->whereHas('product', function($q) use ($data) {
                 $q->where('name', 'like', '%' . $data['product'] . '%');
-            });
-        }
-
-        if(!empty($data['store'])){
-            $items = $items->whereHas('store', function($q) use ($data) {
-                $q->where('name', 'like', '%' . $data['store'] . '%');
             });
         }
 
@@ -186,7 +174,6 @@ class Prices extends Controller
             return response()->json('Not Found', 404);
         }
         $item->product->get();
-        $item->store->get();
 
         return response()->json($item, 200);
     }
@@ -209,7 +196,6 @@ class Prices extends Controller
 
         $validator = Validator::make($request->all(), [
             'product_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:products,id'],
-            'store_id' => ['required','numeric', 'min:0', 'not_in:0', 'exists:stores,id'],
             'amount' => ['required','numeric', 'min:0', 'not_in:0'],
         ]);
         if($validator->fails()){
@@ -218,11 +204,9 @@ class Prices extends Controller
 
         $data = $validator->valid();
         $item->product_id = $data['product_id'];
-        $item->store_id = $data['store_id'];
         $item->amount = $data['amount'];
         $item->save();
         $item->product->get();
-        $item->store->get();
         
         return response()->json($item, 200);
     }

@@ -25,13 +25,6 @@ Route::get('/users/{id}', 'Users@read')->middleware('auth:api');
 Route::put('/users/{id}', 'Users@update')->middleware('auth:api');
 Route::delete('/users/{id}', 'Users@destroy')->middleware('auth:api');
 
-Route::get('/stores', 'Stores@index')->middleware('auth:api');
-Route::post('/stores', 'Stores@search')->middleware('auth:api');
-Route::put('/stores', 'Stores@create')->middleware('auth:api');
-Route::get('/stores/{id}', 'Stores@read')->middleware('auth:api');
-Route::put('/stores/{id}', 'Stores@update')->middleware('auth:api');
-Route::delete('/stores/{id}', 'Stores@destroy')->middleware('auth:api');
-
 Route::get('/categories', 'Categories@index')->middleware('auth:api');
 Route::post('/categories', 'Categories@search')->middleware('auth:api');
 Route::put('/categories', 'Categories@create')->middleware('auth:api');

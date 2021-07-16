@@ -101,7 +101,6 @@ class Products extends Controller
         foreach($items['results'] as &$product) {
             $product['lastPrice'] = Price::getLastPrice($product['id']);
             $product['avgPrice'] = Price::getAvgPrice($product['id']);
-            $product['stores'] = Price::getStores($product['id']);
         }
         
         return response()->json($items, 200);

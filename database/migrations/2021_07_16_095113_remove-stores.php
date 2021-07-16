@@ -3,9 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
-class AddCreatedBy extends Migration
+class RemoveStores extends Migration
 {
     /**
      * Run the migrations.
@@ -15,17 +14,12 @@ class AddCreatedBy extends Migration
     public function up()
     {
         Schema::table('prices', function (Blueprint $table) {
-            //
-            $table->unsignedBigInteger('created_by')->nullable();
-            $table->foreign('created_by')->references('id')->on('users');
+            $table->dropForeign(['store_id']);
+            $table->dropColumn('store_id');
         });
 
-        $user_id = DB::table('users')->first()->id;
 
-        DB::table('prices')
-            ->update([
-                "created_by" => $user_id
-        ]);
+        Schema::dropIfExists('stores');
     }
 
     /**
@@ -35,9 +29,15 @@ class AddCreatedBy extends Migration
      */
     public function down()
     {
+        Schema::create('stores', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 100);
+            $table->timestamps();
+        });
+
         Schema::table('prices', function (Blueprint $table) {
-            //
-            $table->dropColumn('created_by');
+            $table->unsignedBigInteger('store_id');
+            $table->foreign('store_id')->references('id')->on('stores');
         });
     }
 }
