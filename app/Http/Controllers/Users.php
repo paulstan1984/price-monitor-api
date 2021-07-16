@@ -154,6 +154,10 @@ class Users extends Controller
         }
 
         $items = $this->paginationService->applyPagination($items, $data['page']);
+
+        foreach($items['results'] as &$item){
+            $item['password'] = '***';
+        }
         
         return response()->json($items, 200);
     }
@@ -171,6 +175,8 @@ class Users extends Controller
         if($item == null){
             return response()->json('Not Found', 404);
         }
+
+        $item->password = '***';
 
         return response()->json($item, 200);
     }
@@ -203,7 +209,7 @@ class Users extends Controller
         $data = $validator->valid();
         $item->username = $data['username'];
         $item->name = $data['name'];
-        if(!empty($data['password'])) {
+        if(!empty($data['password']) && $data['password'] != '***') {
             $item->password = $data['password'];
         }
         $item->save();
