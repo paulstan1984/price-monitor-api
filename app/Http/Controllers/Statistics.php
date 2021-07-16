@@ -76,15 +76,16 @@ class Statistics extends Controller
         }
 
         $data = $validator->valid();
-
+        $created_by = $request->attributes->get('user_id');
+        
         if($data['GrouppingType']=='month') {
-            $stats = Price::getStatistics($data, 'month');
+            $stats = Price::getStatistics($data, 'month', $created_by);
         }
         else if ($data['GrouppingType']=='none') {
-            $stats = Price::getStatistics($data, 'none');
+            $stats = Price::getStatistics($data, 'none', $created_by);
         }
         else {
-            $stats = Price::getStatistics($data);
+            $stats = Price::getStatistics($data, 'day', $created_by);
         }
 
         $formated_stats = array();

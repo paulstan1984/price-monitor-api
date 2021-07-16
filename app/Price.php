@@ -38,18 +38,22 @@ class Price extends Model
         return round($avg_price, 2);
     }
 
-    public static function getStatistics($data, $groupingType = 'day')
+    public static function getStatistics($data, $groupingType = 'day', $created_by = 0)
     {
         $data['StartDate'] = date('Y-m-d', strtotime($data['StartDate']));
         $data['EndDate'] = date('Y-m-d', strtotime($data['EndDate'] . ' +1 day'));
-        
+
         $query = Price::query();
+
+        if ($created_by > 0) {
+
+            $query = $query->where("created_by", '=', $created_by);
+        }
 
         $select_cols = [];
         if ($groupingType == 'day') {
             $select_cols[] = DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\') as Date');
-        }
-        else if ($groupingType == 'month') {
+        } else if ($groupingType == 'month') {
             $select_cols[] = DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m\') as Date');
         }
 
@@ -62,8 +66,7 @@ class Price extends Model
         $group_by_cols = [];
         if ($groupingType == 'day') {
             $group_by_cols[] = DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\')');
-        }
-        else if ($groupingType == 'month') {
+        } else if ($groupingType == 'month') {
             $group_by_cols[] = DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m\')');
         }
 
@@ -89,17 +92,16 @@ class Price extends Model
             ->join('products', 'prices.product_id', '=', 'products.id')
             ->select($select_cols);
 
-        if(count($group_by_cols)>0) {
+        if (count($group_by_cols) > 0) {
             $query = $query->groupBy($group_by_cols);
         }
 
         if ($groupingType == 'day') {
             $query = $query->orderBy(DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m-%d\')'));
-        }
-        else if ($groupingType == 'month') {
+        } else if ($groupingType == 'month') {
             $query = $query->orderBy(DB::raw('DATE_FORMAT(prices.created_at, \'%Y-%m\')'));
         }
-            
+
         $query = $query->get();
 
         return $query;
