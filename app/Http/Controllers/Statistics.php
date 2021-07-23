@@ -44,6 +44,37 @@ class Statistics extends Controller
         return $totals;
     }
 
+    private function getDetailedAvgStats($stats)
+    {
+        $totals = [];
+        for ($i = 6; $i < count($stats); $i++) {
+            $s = $stats[$i];
+            $t = 0;
+            $max = $stats[$i]['TotalPrice'];
+            $min = $stats[$i]['TotalPrice'];
+            for ($j = 0; $j < 7; $j++) {
+                $t += $stats[$i - $j]['TotalPrice'];
+
+                if ($stats[$i - $j]['TotalPrice'] > $max) {
+                    $max = $stats[$i - $j]['TotalPrice'];
+                }
+
+                if ($stats[$i - $j]['TotalPrice'] < $min) {
+                    $min = $stats[$i - $j]['TotalPrice'];
+                }
+            }
+
+            $totals[] = (object)array(
+                "name" => date('Y-m-d', strtotime($s['Date'])),
+                "value" => round($t / 7, 2),
+                "max" => $max,
+                "min" => $min
+            );
+        }
+
+        return $totals;
+    }
+
     private function getTotalDetails($stats)
     {
         $totals = [];
@@ -78,20 +109,18 @@ class Statistics extends Controller
         $data = $validator->valid();
         $created_by = $request->attributes->get('user_id');
         $is_admin = $request->attributes->get('admin');
-        
-        if($data['GrouppingType']=='month') {
+
+        if ($data['GrouppingType'] == 'month') {
             $stats = Price::getStatistics($data, 'month', !$is_admin ? $created_by : 0);
-        }
-        else if ($data['GrouppingType']=='none') {
+        } else if ($data['GrouppingType'] == 'none') {
             $stats = Price::getStatistics($data, 'none', !$is_admin ? $created_by : 0);
-        }
-        else {
+        } else {
             $stats = Price::getStatistics($data, 'day', !$is_admin ? $created_by : 0);
         }
 
         $formated_stats = array();
 
-        if($data['GrouppingType']=='none') {
+        if ($data['GrouppingType'] == 'none') {
             $formated_stats[] = (object)array(
                 'name' => 'Total',
                 'series' => $this->getTotalDetails($stats)
@@ -120,6 +149,32 @@ class Statistics extends Controller
                 'series' => $this->getDetailedTotalStats($stats)
             );
         }
+
+        return response()->json($formated_stats, 200);
+    }
+
+    public function dailyavgprice(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'StartDate' => ['date', 'nullable'],
+            'EndDate' => ['date', 'nullable'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 400);
+        }
+
+        $data = $validator->valid();
+        $created_by = $request->attributes->get('user_id');
+        $is_admin = $request->attributes->get('admin');
+
+        $formated_stats = array();
+
+        $stats = Price::getStatistics($data, 'day', !$is_admin ? $created_by : 0);
+
+        $formated_stats[] = (object)array(
+            'name' => 'AvgPrice',
+            'series' => $this->getDetailedAvgStats($stats)
+        );
 
         return response()->json($formated_stats, 200);
     }

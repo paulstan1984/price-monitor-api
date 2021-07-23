@@ -54,3 +54,4 @@ Route::put('/recognize-invoice', 'Recognize@invoice')->middleware('auth:api');
 Route::put('/recognize-prices', 'Recognize@getPrices')->middleware('auth:api');
 
 Route::post('/statistics', 'Statistics@search')->middleware('auth:api');
+Route::post('/avg-price/day', 'Statistics@dailyavgprice')->middleware('auth:api');
