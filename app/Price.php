@@ -106,4 +106,50 @@ class Price extends Model
 
         return $query;
     }
+
+    public static function getCategoriesStatistics($data, $groupingType = 'day', $created_by = 0)
+    {
+        $data['StartDate'] = date('Y-m-d', strtotime($data['StartDate']));
+        $data['EndDate'] = date('Y-m-d', strtotime($data['EndDate'] . ' +1 day'));
+
+        $query = Price::query();
+
+        if ($created_by > 0) {
+
+            $query = $query->where("created_by", '=', $created_by);
+        }
+
+        $select_cols = [];
+
+        $select_cols = array_merge($select_cols, [
+            DB::raw('categories.id,categories.name as category'),
+            DB::raw('categories.name'),
+            DB::raw('ROUND(max(prices.amount), 2) as MaxPrice'),
+            DB::raw('ROUND(avg(prices.amount), 2) as AvgPrice'),
+            DB::raw('ROUND(sum(prices.amount), 2) as TotalPrice'),
+        ]);
+
+        $group_by_cols = [DB::raw('categories.id'), DB::raw('categories.name')];
+
+        if (!empty($data['StartDate'])) {
+            $query = $query->where(DB::raw('prices.created_at'), '>=', $data['StartDate']);
+        }
+
+        if (!empty($data['EndDate'])) {
+            $query = $query->where(DB::raw('prices.created_at'), '<=', $data['EndDate']);
+        }
+
+        $query = $query
+            ->join('products', 'prices.product_id', '=', 'products.id')
+            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->select($select_cols);
+
+        if (count($group_by_cols) > 0) {
+            $query = $query->groupBy($group_by_cols);
+        }
+
+        $query = $query->get();
+
+        return $query;
+    }
 }

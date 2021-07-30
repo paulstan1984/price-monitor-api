@@ -88,6 +88,19 @@ class Statistics extends Controller
         return $totals;
     }
 
+    private function getTotalCategoriesDetails($stats)
+    {
+        $totals = [];
+        foreach ($stats as $s) {
+            $totals[] = (object)array(
+                "name" => sprintf("%s", $s['category']),
+                "value" => $s['TotalPrice'],
+            );
+        }
+
+        return $totals;
+    }
+
     /**
      * Search products
      *
@@ -174,6 +187,33 @@ class Statistics extends Controller
         $formated_stats[] = (object)array(
             'name' => 'AvgPrice',
             'series' => $this->getDetailedAvgStats($stats)
+        );
+
+        return response()->json($formated_stats, 200);
+    }
+
+    public function dailyavgpricecategory(Request $request)
+    {
+        //aici
+        $validator = Validator::make($request->all(), [
+            'StartDate' => ['date', 'nullable'],
+            'EndDate' => ['date', 'nullable'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 400);
+        }
+
+        $data = $validator->valid();
+        $created_by = $request->attributes->get('user_id');
+        $is_admin = $request->attributes->get('admin');
+
+        $formated_stats = array();
+
+        $stats = Price::getCategoriesStatistics($data, !$is_admin ? $created_by : 0);
+
+        $formated_stats[] = (object)array(
+            'name' => 'Stats',
+            'series' => $this->getTotalCategoriesDetails($stats)
         );
 
         return response()->json($formated_stats, 200);
