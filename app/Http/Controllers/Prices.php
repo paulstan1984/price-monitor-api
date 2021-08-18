@@ -103,7 +103,8 @@ class Prices extends Controller
             'order_dir' => ['string'],
             'page' => ['required','numeric', 'min:1'],
             'page_size' => ['numeric'],
-            'date' => ['string']
+            'date' => ['string'],
+            'category_ids' => ['array', 'numericarray']
         ]);
         if($validator->fails()){
             return response()->json($validator->messages(), 400);

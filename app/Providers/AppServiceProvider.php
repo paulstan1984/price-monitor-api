@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Validator;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,5 +26,17 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         //
+
+        Validator::extend('numericarray', function ($attribute, $value, $parameters) {
+
+            if(!is_array($value)) {
+                return false;
+            }
+
+            foreach ($value as $v) {
+                if (!is_int($v)) return false;
+            }
+            return true;
+        });
     }
 }

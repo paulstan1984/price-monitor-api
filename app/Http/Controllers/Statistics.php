@@ -7,13 +7,6 @@ use App\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-Validator::extend('numericarray', function ($attribute, $value, $parameters) {
-    foreach ($value as $v) {
-        if (!is_int($v)) return false;
-    }
-    return true;
-});
-
 class Statistics extends Controller
 {
     private function getDetailedProductStats($pId, $stats)
