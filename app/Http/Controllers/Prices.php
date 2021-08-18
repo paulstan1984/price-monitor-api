@@ -120,6 +120,12 @@ class Prices extends Controller
             });
         }
 
+        if(!empty($data['category_ids'])){
+            $items = $items->whereHas('product', function($q) use ($data) {
+                $q->whereIn('category_id', $data['category_ids']);
+            });
+        }
+
         if(!empty($data['date'])){
 
             if(strlen($data['date']) == 7){
