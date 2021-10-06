@@ -25,6 +25,11 @@ class Categories extends Controller
     public function index()
     {
         $categories = Category::all();
+
+        foreach($categories as &$item){
+            $item['nr_products'] = $item->products->count();
+        }
+
         return response()->json($categories, 200);
     }
 
@@ -83,6 +88,10 @@ class Categories extends Controller
         }
 
         $items = $this->paginationService->applyPagination($items, $data['page']);
+
+        foreach($items['results'] as &$item){
+            $item['nr_products'] = $item->products->count();
+        }
         
         return response()->json($items, 200);
     }
