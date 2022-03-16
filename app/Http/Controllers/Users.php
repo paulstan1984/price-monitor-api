@@ -93,6 +93,14 @@ class Users extends Controller
         return response()->json($users, 200);
     }
 
+    public function test()
+    {
+        $user = (object) array();
+        $user->message = '';
+        $user->date = date('Y-m-d H:i:s');
+        return response()->json($user, 200);
+    }
+
     /**
      * Store a newly created resource in storage.
      *

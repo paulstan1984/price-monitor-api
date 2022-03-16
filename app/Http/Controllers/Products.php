@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule; 
 use Illuminate\Support\Facades\Validator;
 use App\Services\PaginationService;
+use Illuminate\Support\Facades\DB;
 
 class Products extends Controller
 {
@@ -30,6 +31,20 @@ class Products extends Controller
             $item->category->get();
         }
         return response()->json($products, 200);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function lastOrderedProducts()
+    {
+        $items = Product::query();
+        $items = $items->whereIn('product_id', DB::raw('select '));
+        $items = $items->take(20);
+
+        return response()->json($items, 200);
     }
 
     /**
