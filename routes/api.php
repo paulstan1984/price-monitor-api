@@ -18,7 +18,9 @@ Route::post('/login', 'Users@login');
 Route::post('/login/mobile', 'Users@mobile_login');
 Route::post('/logout', 'Users@logout');
 
-Route::get('/test', 'Users@test');
+Route::get('/message', 'ParentalControlMessages@getmessage');
+Route::put('/message', 'ParentalControlMessages@storemessage');
+Route::delete('/message', 'ParentalControlMessages@deletemessage');
 
 Route::get('/users', 'Users@index')->middleware('auth:api');
 Route::post('/users', 'Users@search')->middleware('auth:api');
